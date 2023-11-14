@@ -59,8 +59,8 @@ stdenvNoCC.mkDerivation (attrs // {
     #    * https://github.com/elixir-lang/elixir/blob/92d46d0069906f8ed0ccc709e40e21e2acac68c1/lib/mix/lib/mix/scm/git.ex#L259
     #
     # 2. To make this derivation reproducible, remove files which are not
-    #    necessary and change all the time.
-    find deps \( -path '*/.git/index' -o -path '*/.git/logs' \) -exec rm -rf {} +
+    #    essential and change all the time.
+    find deps \( -path '*/.git/index' -o -path '*/.git/logs' -o -path '*/.git/objects/*' \) -exec rm -rf {} +
 
     cp -r --no-preserve=mode,ownership,timestamps deps $out
 
