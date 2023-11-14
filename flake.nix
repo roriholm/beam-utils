@@ -20,7 +20,9 @@
         };
       in
       {
-        packages = { };
+        packages = {
+          test-buildMixRelease = pkgs.callPackage ./test/build-mix-release { };
+        };
       }
     )) // {
       overlays.default = overlay;
