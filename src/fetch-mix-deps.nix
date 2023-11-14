@@ -60,7 +60,13 @@ stdenvNoCC.mkDerivation (attrs // {
     #
     # 2. To make this derivation reproducible, remove files which are not
     #    essential and change all the time.
-    find deps \( -path '*/.git/index' -o -path '*/.git/logs' -o -path '*/.git/objects/*' \) -exec rm -rf {} +
+    find . -path '*/.git/*' \
+      -a ! -name config \
+      -a ! -name HEAD \
+      -a ! \( -type d -name objects \) \
+      -a ! \( -type d -name refs \) \
+      -a ! \( -path '*/refs/*' \) \
+      -exec rm -rf {} +
 
     cp -r --no-preserve=mode,ownership,timestamps deps $out
 
