@@ -75,8 +75,7 @@ stdenvNoCC.mkDerivation (attrs // {
 
   impureEnvVars = lib.fetchers.proxyImpureEnvVars;
 
+  outputHashAlgo = null;
   outputHashMode = "recursive";
-} // (
-  if hash != "" then { outputHashAlgo = null; outputHash = hash; }
-  else { outputHashAlgo = "sha256"; outputHash = lib.fakeSha256; }
-))
+  outputHash = if hash != "" then hash else lib.fakeHash;
+})
