@@ -1,5 +1,6 @@
 { stdenvNoCC
 , lib
+, glibcLocalesUtf8
 , cacert
 , elixir
 , hex
@@ -18,10 +19,13 @@
 , ...
 }@attrs:
 
-stdenvNoCC.mkDerivation (attrs // {
-  nativeBuildInputs = [ cacert elixir hex git ];
-
+stdenvNoCC.mkDerivation (attrs // (if stdenvNoCC.isLinux then {
+  LOCALE_ARCHIVE = "${glibcLocalesUtf8}/lib/locale/locale-archive";
   LC_ALL = "en_US.UTF-8";
+} else {
+  LC_ALL = "en_US.UTF-8";
+}) // {
+  nativeBuildInputs = [ cacert elixir hex git ];
 
   # Mix environment variables
   MIX_ENV = env;

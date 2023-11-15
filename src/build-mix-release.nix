@@ -1,5 +1,6 @@
 { stdenv
 , lib
+, glibcLocalesUtf8
 , elixir
 , hex
 , rebar3
@@ -29,7 +30,12 @@ let
   # Remove non standard attributes
   overridable = builtins.removeAttrs attrs [ "compileFlags" ];
 in
-stdenv.mkDerivation (overridable // {
+stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
+  LOCALE_ARCHIVE = "${glibcLocalesUtf8}/lib/locale/locale-archive";
+  LC_ALL = "en_US.UTF-8";
+} else {
+  LC_ALL = "en_US.UTF-8";
+}) // {
   nativeBuildInputs = [
     elixir
     hex
@@ -38,8 +44,6 @@ stdenv.mkDerivation (overridable // {
     findutils
     makeWrapper
   ] ++ nativeBuildInputs;
-
-  LC_ALL = "en_US.UTF-8";
 
   # Mix and Hex environment variables
   MIX_ENV = env;
@@ -89,19 +93,19 @@ stdenv.mkDerivation (overridable // {
   '';
 
   postFixup = ''
-    # Remove files for Microsoft Windows
-    rm -f "$out"/bin/*.bat
+        # Remove files for Microsoft Windows
+        rm -f "$out"/bin/*.bat
 
-    # Wrap programs in $out/bin with their runtime deps
-    for f in $(find $out/bin/ -type f -executable); do
-      wrapProgram "$f" \
-        --prefix PATH : ${lib.makeBinPath [
-          coreutils
-          gnused
-          gnugrep
-          gawk
-        ]}
-    done
+        # Wrap programs in $out/bin with their runtime deps
+        for f in $(find $out/bin/ -type f -executable); do
+          wrapProgram "$f" \
+            --prefix PATH : ${lib.makeBinPath [
+    coreutils
+    gnused
+    gnugrep
+    gawk
+    ]}
+        done
   '' + lib.optionalString removeCookie ''
     if [ -e $out/releases/COOKIE ]; then
       rm $out/releases/COOKIE
