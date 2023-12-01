@@ -21,9 +21,9 @@
 
 stdenvNoCC.mkDerivation (attrs // (if stdenvNoCC.isLinux then {
   LOCALE_ARCHIVE = "${glibcLocalesUtf8}/lib/locale/locale-archive";
-  LC_ALL = "en_US.UTF-8";
+  LC_ALL = "C.UTF-8";
 } else {
-  LC_ALL = "en_US.UTF-8";
+  LC_ALL = "C.UTF-8";
 }) // {
   nativeBuildInputs = [ cacert elixir hex git ];
 
