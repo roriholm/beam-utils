@@ -131,10 +131,10 @@ stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
   '';
 
   postFixup = ''
-    # Remove files for Microsoft Windows
+    echo "removing files for Microsoft Windows"
     rm -f "$out"/bin/*.bat
 
-    # Wrap programs in $out/bin with their runtime deps
+    echo "wrapping programs in $out/bin with their runtime deps"
     for f in $(find $out/bin/ -type f -executable); do
       wrapProgram "$f" \
         --prefix PATH : ${lib.makeBinPath [
@@ -146,6 +146,7 @@ stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
     done
   '' + lib.optionalString removeCookie ''
     if [ -e $out/releases/COOKIE ]; then
+      echo "removing $out/releases/COOKIE"
       rm $out/releases/COOKIE
     fi
   '' + ''
