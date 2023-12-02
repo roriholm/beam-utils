@@ -2,11 +2,14 @@
 , lib
 , glibcLocalesUtf8
 , elixir
+, erlang
 , hex
 , rebar3
 , git
 , mixHooks
 , findutils
+, ripgrep
+, bbe
 , makeWrapper
 , coreutils
 , gnused
@@ -29,6 +32,7 @@
 , env ? "prod"
 , debug ? false
 , elixir ? inputs.elixir
+, erlang ? inputs.erlang
 , hex ? inputs.hex.override { inherit elixir; }
 , ...
 }@attrs:
@@ -53,6 +57,8 @@ stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
     git
   ] ++ [
     findutils
+    ripgrep
+    bbe
     makeWrapper
   ] ++ nativeBuildInputs;
 
@@ -142,24 +148,43 @@ stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
     if [ -e $out/releases/COOKIE ]; then
       rm $out/releases/COOKIE
     fi
+  '' + ''
+    if [ -e $out/erts-* ]; then
+      echo "ERROR: missing ERTS in $out"
+      echo ""
+      echo "To fix this issue, please make sure:"
+      echo ""
+      echo "+ \`:include_erts\` option of mix release is \`true\`."
+      echo ""
+      exit 1
+    fi
+
+    # ERTS is included in the release, then erlang is not required as a runtime dependency.
+    #
+    # But, erlang is still referenced in some places. Because of that, following steps are required.
+
+    # 1. remove references to erlang from plain text files
+    for file in $(rg "${erlang}/lib/erlang" "$out" --files-with-matches); do
+      echo "removing references to erlang in $file"
+      substituteInPlace "$file" --replace "${erlang}/lib/erlang" "$out"
+    done
+
+    # 2. remove references to erlang from .beam files
+    #
+    # No need to do anything, because it has been handled by ERL_COMPILER_OPTIONS.
+
+    # 3. remove references to erlang from normal binary files
+    for file in $(rg "${erlang}/lib/erlang" "$out" --files-with-matches --binary --iglob '!*.beam'); do
+      echo "removing references to erlang in $file"
+      # use bbe to substitute strings in binary files, because using substituteInPlace
+      # on binaries will raise errors
+      bbe -e "s|${erlang}/lib/erlang|$out|" -o "$file".tmp "$file"
+      rm -f "$file"
+      mv "$file".tmp "$file"
+    done
   '';
 
   # TODO: remove erlang references in resulting derivation
-  #
-  # # Step 1 - investigate why the resulting derivation still has references to erlang.
-  #
-  # The reason is that the generated binaries contains erlang reference. Here's a repo to
-  # demonstrate the problem - <https://github.com/plastic-gun/nix-mix-release-unwanted-references>.
-  #
-  #
-  # # Step 2 - remove erlang references from the binaries
-  #
-  # As said in above repo, it's hard to remove erlang references from `.beam` binaries.
-  #
-  # We need more experienced developers to resolve this issue.
-  #
-  #
-  # # Tips
   #
   # When resolving this issue, it is convenient to fail the build when erlang is referenced,
   # which can be achieved by using:
