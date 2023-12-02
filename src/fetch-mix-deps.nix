@@ -54,6 +54,8 @@ stdenvNoCC.mkDerivation (attrs // (if stdenvNoCC.isLinux then {
   installPhase = attrs.installPhase or ''
     runHook preInstall
 
+    mkdir -p $out
+
     mix deps.get --only $MIX_ENV
 
     # 1. To make Elixir deps checking work as expected, .git should be a
@@ -62,8 +64,15 @@ stdenvNoCC.mkDerivation (attrs // (if stdenvNoCC.isLinux then {
     #
     #    * https://github.com/elixir-lang/elixir/blob/92d46d0069906f8ed0ccc709e40e21e2acac68c1/lib/mix/lib/mix/scm/git.ex#L259
     #
-    # 2. To make this derivation reproducible, remove files which are not
-    #    essential and change all the time.
+    # 2. To make this derivation reproducible, remove all git files except the
+    #    necessary files:
+    #
+    #    * config
+    #    * HEAD
+    #    * objects/
+    #    * refs/
+    #    * */refs/*
+    #
     find . -path '*/.git/*' \
       -a ! -name config \
       -a ! -name HEAD \
@@ -72,7 +81,9 @@ stdenvNoCC.mkDerivation (attrs // (if stdenvNoCC.isLinux then {
       -a ! \( -path '*/refs/*' \) \
       -exec rm -rf {} +
 
-    cp -r --no-preserve=mode,ownership,timestamps deps $out
+    cp --no-preserve=mode,ownership,timestamps mix.exs $out
+    cp --no-preserve=mode,ownership,timestamps mix.lock $out
+    cp --no-preserve=mode,ownership,timestamps -r deps $out
 
     runHook postInstall
   '';
