@@ -149,9 +149,10 @@ stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
       rm $out/releases/COOKIE
     fi
   '' + ''
-    if [ -e $out/erts-* ]; then
+    if ! [ -e $out/erts-* ]; then
       echo "ERROR: missing ERTS in $out"
       echo ""
+      echo "References to erlang will be removed in the subsequent processing flow, because of that, ERTS must be included in the release."
       echo "To fix this issue, please make sure:"
       echo ""
       echo "+ \`:include_erts\` option of mix release is \`true\`."
