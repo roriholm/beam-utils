@@ -1,5 +1,9 @@
 # shellcheck shell=bash
+#
+# This hook is derived from nixpkgs/pkgs/build-support/node/build-npm-package/hooks/npm-config-hook.sh
+#
 
+# use a special name for avoiding naming conflicts
 _mixDepsCheckHook_log() {
     echo "[mix-deps-check] $1"
 }
@@ -27,11 +31,11 @@ mixDepsCheckHook() {
       echo
       echo "ERROR: the hash of mixDeps is out of date"
       echo
-      echo "The mix.lock in src is not the same as the in $mixDeps. To fix the issue:"
+      echo "The mix.lock in src is not the same as the one in $mixDeps. To fix the issue:"
       echo
-      echo "1. Use \`lib.fakeHash\` as the value of \`hash\` field of mixDeps"
+      echo "1. Use \`lib.fakeHash\` as the value of \`hash\` field of \`mixDeps\`"
       echo "2. Build the derivation and wait for it to fail with a hash mismatch"
-      echo "3. Copy the 'got: sha256-' value back into the value of \`hash\` field of mixDeps"
+      echo "3. Copy the 'got: sha256-' value back into the value of \`hash\` field of \`mixDeps\`"
       echo
 
       exit 1
