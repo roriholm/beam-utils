@@ -19,7 +19,12 @@
 , src
 , nativeBuildInputs ? [ ]
 , mixDeps ? null
-, compileFlags ? [ ]
+  # Options to be passed to the `mix compile`.
+  # Checkout `mix help compile` for more details.
+, mixCompilerOptions ? [ ]
+  # Options to be passed to the Erlang compiler.
+  # Checkout <https://www.erlang.org/doc/man/compile> for more details.
+, erlCompilerOptions ? [ ]
 , removeCookie ? true
 , env ? "prod"
 , debug ? false
@@ -29,7 +34,10 @@
 }@attrs:
 let
   # Remove non standard attributes
-  overridable = builtins.removeAttrs attrs [ "compileFlags" ];
+  overridable = builtins.removeAttrs attrs [
+    "mixCompilerOptions"
+    "erlCompilerOptions"
+  ];
 in
 stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
   LOCALE_ARCHIVE = "${glibcLocalesUtf8}/lib/locale/locale-archive";
@@ -57,6 +65,22 @@ stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
   # Rebar3 environment variables
   DEBUG = if debug then 1 else 0; # for Rebar3 compilation
 
+  # Erlang environment variables
+  ERL_COMPILER_OPTIONS =
+    let
+      compilerOptions = lib.unique (
+        [
+          # Remove options and source tuples from Line chunk of BEAM files.
+          # This option will make it easier to achieve reproducible builds,
+          #
+          # In the Nix world, it helps to remove erlang references from BEAM files.
+          "deterministic"
+        ]
+        ++ lib.optional debug "debug_info"
+      );
+    in
+    "[${lib.concatStringsSep "," compilerOptions}]";
+
   configurePhase = attrs.configurePhase or ''
     runHook preConfigure
 
@@ -79,13 +103,18 @@ stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
     runHook postConfigure
   '';
 
-  buildPhase = attrs.buildPhase or ''
-    runHook preBuild
+  buildPhase = attrs.buildPhase or (
+    let
+      compilerOptions = lib.unique mixCompilerOptions;
+    in
+    ''
+      runHook preBuild
 
-    mix compile ${lib.concatStringsSep " " compileFlags}
+      mix compile ${lib.concatStringsSep " " compilerOptions}
 
-    runHook postBuild
-  '';
+      runHook postBuild
+    ''
+  );
 
   installPhase = attrs.installPhase or ''
     runHook preInstall
