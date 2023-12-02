@@ -5,6 +5,7 @@
 , hex
 , rebar3
 , git
+, mixHooks
 , findutils
 , makeWrapper
 , coreutils
@@ -17,7 +18,7 @@
 , version
 , src
 , nativeBuildInputs ? [ ]
-, mixFodDeps ? null
+, mixDeps ? null
 , compileFlags ? [ ]
 , removeCookie ? true
 , env ? "prod"
@@ -37,6 +38,8 @@ stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
   LC_ALL = "C.UTF-8";
 }) // {
   nativeBuildInputs = [
+    mixHooks.mixDepsCheckHook
+  ] ++ [
     elixir
     hex
     git
@@ -65,10 +68,10 @@ stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
     export REBAR_GLOBAL_CONFIG_DIR="$TEMPDIR/.rebar3"
     export REBAR_CACHE_DIR="$TEMPDIR/.rebar3.cache"
 
-    ${lib.optionalString (mixFodDeps != null) ''
+    ${lib.optionalString (mixDeps != null) ''
       # Compilation of the dependencies requires that the dependency is
       # writable, thus a copy to deps/.
-      cp -r --no-preserve=mode "${mixFodDeps}" deps
+      cp -r --no-preserve=mode "${mixDeps}/deps" deps
     ''}
 
     mix deps.compile --skip-umbrella-children
@@ -93,19 +96,19 @@ stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
   '';
 
   postFixup = ''
-        # Remove files for Microsoft Windows
-        rm -f "$out"/bin/*.bat
+    # Remove files for Microsoft Windows
+    rm -f "$out"/bin/*.bat
 
-        # Wrap programs in $out/bin with their runtime deps
-        for f in $(find $out/bin/ -type f -executable); do
-          wrapProgram "$f" \
-            --prefix PATH : ${lib.makeBinPath [
-    coreutils
-    gnused
-    gnugrep
-    gawk
-    ]}
-        done
+    # Wrap programs in $out/bin with their runtime deps
+    for f in $(find $out/bin/ -type f -executable); do
+      wrapProgram "$f" \
+        --prefix PATH : ${lib.makeBinPath [
+          coreutils
+          gnused
+          gnugrep
+          gawk
+        ]}
+    done
   '' + lib.optionalString removeCookie ''
     if [ -e $out/releases/COOKIE ]; then
       rm $out/releases/COOKIE
