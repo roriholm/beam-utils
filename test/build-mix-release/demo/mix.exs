@@ -23,7 +23,9 @@ defmodule Demo.MixProject do
     [
       # Elixir deps comes from Hex
       {:jason, "~> 1.4"},
-      # # Erlang deps comes from Hex
+      {:floki, "~> 0.35.0"},
+      {:fast_html, "~> 2.0"},
+      # Erlang deps comes from Hex
       {:hackney, "~> 1.20"},
       # Deps comes from Git
       {:mint, github: "elixir-mint/mint", tag: "v1.5.1"}

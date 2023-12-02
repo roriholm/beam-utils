@@ -1,4 +1,4 @@
-{ beamUtils, ... }:
+{ beamUtils, gcc, cmake, ... }:
 let
   pname = "demo";
   version = "0.1.0";
@@ -7,10 +7,12 @@ in
 beamUtils.buildMixRelease {
   inherit pname version src;
 
-  mixFodDeps = beamUtils.fetchMixDeps {
+  nativeBuildInputs = [ gcc cmake ];
+
+  mixDeps = beamUtils.fetchMixDeps {
     pname = "${pname}-mix-deps";
     inherit version src;
-    hash = "sha256-5rVnKLy5tiDfsawtmwhnHdhgnM95jHpVcQCiD7GHkM8=";
+    hash = "sha256-RWMBoFD0fEVlpHJcWox0yKqDPZW/iSamZfDgvu6BbSU=";
   };
 
   removeCookie = false;
