@@ -144,12 +144,12 @@ stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
           gawk
         ]}
     done
-  '' + lib.optionalString removeCookie ''
+  '' + (lib.optionalString removeCookie ''
     if [ -e $out/releases/COOKIE ]; then
       echo "removing $out/releases/COOKIE"
       rm $out/releases/COOKIE
     fi
-  '' + ''
+  '') + ''
     if ! [ -e $out/erts-* ]; then
       echo "ERROR: missing ERTS in $out"
       echo ""
