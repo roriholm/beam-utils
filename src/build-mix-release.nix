@@ -144,12 +144,12 @@ stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
           gawk
         ]}
     done
-  '' + (lib.optionalString removeCookie ''
+  '' + lib.optionalString removeCookie ''
     if [ -e $out/releases/COOKIE ]; then
       echo "removing $out/releases/COOKIE"
       rm $out/releases/COOKIE
     fi
-  '') + ''
+  '' + ''
     if ! [ -e $out/erts-* ]; then
       echo "ERROR: missing ERTS in $out"
       echo ""
@@ -186,11 +186,9 @@ stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
     done
   '';
 
-  # TODO: remove erlang references in resulting derivation
+  # References to erlang should be removed from output after above processing.
   #
-  # When resolving this issue, it is convenient to fail the build when erlang is referenced,
-  # which can be achieved by using:
-  #
-  #   disallowedReferences = [ erlang ];
-  #
+  # Here, disallowedReferences attribute is used to guard that erlang is not referenced. If erlang
+  # is referenced, which is not expected, an error will be raised.
+  disallowedReferences = [ erlang ];
 })
