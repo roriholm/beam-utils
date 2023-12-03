@@ -62,15 +62,6 @@ stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
     makeWrapper
   ] ++ nativeBuildInputs;
 
-  # Mix and Hex environment variables
-  MIX_ENV = env;
-  MIX_REBAR3 = "${rebar3}/bin/rebar3";
-  MIX_DEBUG = if debug then 1 else 0;
-  HEX_OFFLINE = 1;
-
-  # Rebar3 environment variables
-  DEBUG = if debug then 1 else 0; # for Rebar3 compilation
-
   # Erlang environment variables
   ERL_COMPILER_OPTIONS =
     let
@@ -87,12 +78,25 @@ stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
     in
     "[${lib.concatStringsSep "," compilerOptions}]";
 
+  # Hex environment variables
+  HEX_OFFLINE = 1;
+
+  # Mix environment variables
+  MIX_ENV = env;
+  MIX_REBAR3 = "${rebar3}/bin/rebar3";
+  MIX_DEBUG = if debug then 1 else 0;
+
+  # Rebar environment variables
+  DEBUG = if debug then 1 else 0; # for Rebar3 compilation
+
   configurePhase = attrs.configurePhase or ''
     runHook preConfigure
 
-    # Mix and Hex
-    export MIX_HOME="$TEMPDIR/.mix"
+    # Hex
     export HEX_HOME="$TEMPDIR/.hex"
+
+    # Mix
+    export MIX_HOME="$TEMPDIR/.mix"
 
     # Rebar
     export REBAR_GLOBAL_CONFIG_DIR="$TEMPDIR/.rebar3"
@@ -162,7 +166,6 @@ stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
     fi
 
     # ERTS is included in the release, then erlang is not required as a runtime dependency.
-    #
     # But, erlang is still referenced in some places. Because of that, following steps are required.
 
     # 1. remove references to erlang from plain text files
@@ -173,7 +176,8 @@ stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
 
     # 2. remove references to erlang from .beam files
     #
-    # No need to do anything, because it has been handled by ERL_COMPILER_OPTIONS.
+    # No need to do anything, because it has been handled by "deterministic" option specified
+    # by ERL_COMPILER_OPTIONS.
 
     # 3. remove references to erlang from normal binary files
     for file in $(rg "${erlang}/lib/erlang" "$out" --files-with-matches --binary --iglob '!*.beam'); do
