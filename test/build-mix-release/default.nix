@@ -16,5 +16,4 @@ beamUtils.buildMixRelease {
   };
 
   removeCookie = false;
-  enableDebug = false;
 }
