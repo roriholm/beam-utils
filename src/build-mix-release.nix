@@ -45,9 +45,9 @@ let
 in
 stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
   LOCALE_ARCHIVE = "${glibcLocalesUtf8}/lib/locale/locale-archive";
-  LC_ALL = "C.UTF-8";
+  LC_ALL = "en_US.UTF-8";
 } else {
-  LC_ALL = "C.UTF-8";
+  LC_ALL = "en_US.UTF-8";
 }) // {
   nativeBuildInputs = [
     mixHooks.mixDepsCheckHook
