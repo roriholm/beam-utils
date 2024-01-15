@@ -21,6 +21,7 @@
 , version
 , src
 , nativeBuildInputs ? [ ]
+, mixEnv ? "prod"
 , mixDeps ? null
   # Options to be passed to the `mix compile`.
   # Checkout `mix help compile` for more details.
@@ -29,7 +30,6 @@
   # Checkout <https://www.erlang.org/doc/man/compile> for more details.
 , erlCompilerOptions ? [ ]
 , removeCookie ? true
-, env ? "prod"
 , debug ? false
 , elixir ? inputs.elixir
 , erlang ? inputs.erlang
@@ -37,10 +37,18 @@
 , ...
 }@attrs:
 let
-  # Remove non standard attributes
   overridable = builtins.removeAttrs attrs [
+    "env"
+    "nativeBuildInputs"
+    "mixEnv"
+    "mixDeps"
     "mixCompilerOptions"
     "erlCompilerOptions"
+    "removeCookie"
+    "debug"
+    "elixir"
+    "erlang"
+    "hex"
   ];
 in
 stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
@@ -82,7 +90,7 @@ stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
   HEX_OFFLINE = 1;
 
   # Mix environment variables
-  MIX_ENV = env;
+  MIX_ENV = mixEnv;
   MIX_REBAR3 = "${rebar3}/bin/rebar3";
   MIX_DEBUG = if debug then 1 else 0;
 
