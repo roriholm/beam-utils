@@ -24,6 +24,10 @@ Test `buildMixRelease`:
 $ nix build '.#test-buildMixRelease'
 ```
 
+## Todo
+
+Read [TODO.md](./TODO.md) for more details.
+
 ## License
 
 Apache License 2.0
