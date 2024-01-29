@@ -26,4 +26,4 @@ $ nix build '.#test-buildMixRelease'
 
 ## License
 
-MIT
+Apache License 2.0
