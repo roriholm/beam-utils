@@ -12,14 +12,23 @@
 , version
 , src
 , hash ? ""
-, env ? "prod"
+, env ? { }
+, mixEnv ? "prod"
 , debug ? false
 , elixir ? inputs.elixir
 , hex ? inputs.hex.override { inherit elixir; }
 , ...
 }@attrs:
-
-stdenvNoCC.mkDerivation (attrs // (if stdenvNoCC.isLinux then {
+let
+  overridable = builtins.removeAttrs attrs [
+    "env"
+    "mixEnv"
+    "debug"
+    "elixir"
+    "hex"
+  ];
+in
+stdenvNoCC.mkDerivation (overridable // (if stdenvNoCC.isLinux then {
   LOCALE_ARCHIVE = "${glibcLocalesUtf8}/lib/locale/locale-archive";
   LC_ALL = "en_US.UTF-8";
 } else {
@@ -27,20 +36,27 @@ stdenvNoCC.mkDerivation (attrs // (if stdenvNoCC.isLinux then {
 }) // {
   nativeBuildInputs = [ cacert elixir hex git ];
 
-  # Mix environment variables
-  MIX_ENV = env;
-  MIX_REBAR3 = "${rebar3}/bin/rebar3";
-  MIX_DEBUG = if debug then 1 else 0;
+  env = {
+    # Mix environment variables
+    MIX_ENV = mixEnv;
+    MIX_REBAR3 = "${rebar3}/bin/rebar3";
+    MIX_DEBUG = if debug then 1 else 0;
 
-  # Rebar3 environment variables
-  DEBUG = if debug then 1 else 0;
+    # Rebar3 environment variables
+    DEBUG = if debug then 1 else 0;
+  } // env;
 
   configurePhase = ''
     runHook preConfigure
 
-    # Mix and Hex
-    export MIX_HOME="$TEMPDIR/.mix";
+    # general
+    export HOME="$TEMPDIR"
+
+    # Hex
     export HEX_HOME="$TEMPDIR/.hex";
+
+    # Mix
+    export MIX_HOME="$TEMPDIR/.mix";
 
     # Rebar3
     export REBAR_GLOBAL_CONFIG_DIR="$TMPDIR/.rebar3"

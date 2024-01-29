@@ -21,6 +21,7 @@
 , version
 , src
 , nativeBuildInputs ? [ ]
+, env ? { }
 , mixEnv ? "prod"
 , mixDeps ? null
   # Options to be passed to the `mix compile`.
@@ -70,35 +71,37 @@ stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
     makeWrapper
   ] ++ nativeBuildInputs;
 
-  # Erlang environment variables
-  ERL_COMPILER_OPTIONS =
-    let
-      compilerOptions = lib.unique (
-        [
-          # Remove options and source tuples from Line chunk of BEAM files.
-          # This option will make it easier to achieve reproducible builds,
-          #
-          # In the Nix world, it helps to remove erlang references from BEAM files.
-          "deterministic"
-        ]
-        ++ lib.optional debug "debug_info"
-      );
-    in
-    "[${lib.concatStringsSep "," compilerOptions}]";
+  env = {
+    # Erlang environment variables
+    ERL_COMPILER_OPTIONS =
+      let
+        compilerOptions = lib.unique (
+          [
+            # Remove options and source tuples from Line chunk of BEAM files.
+            # This option will make it easier to achieve reproducible builds,
+            #
+            # In the Nix world, it helps to remove erlang references from BEAM files.
+            "deterministic"
+          ]
+          ++ lib.optional debug "debug_info"
+        );
+      in
+      "[${lib.concatStringsSep "," compilerOptions}]";
 
-  # Hex environment variables
-  HEX_OFFLINE = 1;
+    # Mix environment variables
+    MIX_ENV = mixEnv;
+    MIX_REBAR3 = "${rebar3}/bin/rebar3";
+    MIX_DEBUG = if debug then 1 else 0;
 
-  # Mix environment variables
-  MIX_ENV = mixEnv;
-  MIX_REBAR3 = "${rebar3}/bin/rebar3";
-  MIX_DEBUG = if debug then 1 else 0;
-
-  # Rebar environment variables
-  DEBUG = if debug then 1 else 0; # for Rebar3 compilation
+    # Rebar3 environment variables
+    DEBUG = if debug then 1 else 0; # for Rebar3 compilation
+  } // env;
 
   configurePhase = attrs.configurePhase or ''
     runHook preConfigure
+
+    # general
+    export HOME="$TEMPDIR"
 
     # Hex
     export HEX_HOME="$TEMPDIR/.hex"
@@ -106,7 +109,7 @@ stdenv.mkDerivation (overridable // (if stdenv.isLinux then {
     # Mix
     export MIX_HOME="$TEMPDIR/.mix"
 
-    # Rebar
+    # Rebar3
     export REBAR_GLOBAL_CONFIG_DIR="$TEMPDIR/.rebar3"
     export REBAR_CACHE_DIR="$TEMPDIR/.rebar3.cache"
 
