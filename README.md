@@ -1,4 +1,4 @@
-# nix-beam-utils
+# beam-utils
 
 A flake providing utils for BEAM.
 
