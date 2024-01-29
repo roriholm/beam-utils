@@ -25,6 +25,8 @@ defmodule Demo.MixProject do
       {:jason, "~> 1.4"},
       {:floki, "~> 0.35.0"},
       {:fast_html, "~> 2.0"},
+      # Elixir deps comes from Hex - rustler_precompiled
+      {:uuidv7, "~> 0.2.1"},
       # Erlang deps comes from Hex
       {:hackney, "~> 1.20"},
       # Deps comes from Git

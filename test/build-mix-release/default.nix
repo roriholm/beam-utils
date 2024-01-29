@@ -12,7 +12,7 @@ beamUtils.buildMixRelease {
   mixDeps = beamUtils.fetchMixDeps {
     pname = "${pname}-mix-deps";
     inherit version src;
-    hash = "sha256-RWMBoFD0fEVlpHJcWox0yKqDPZW/iSamZfDgvu6BbSU=";
+    hash = "sha256-H9VVTPeX6JYXeEx+UHFTnJzwN8OShrqXlEuFrdAC0T8=";
   };
 
   removeCookie = false;
