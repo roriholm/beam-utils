@@ -8,7 +8,5 @@ let
   buildMixRelease = callPackage ./build-mix-release.nix { inherit mixHooks; };
 in
 {
-  inherit
-    fetchMixDeps
-    buildMixRelease;
+  inherit fetchMixDeps buildMixRelease;
 }

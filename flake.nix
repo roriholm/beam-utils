@@ -6,13 +6,17 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+    }:
     let
-      overlay = final: prev: {
-        beamUtils = prev.callPackage ./src { };
-      };
+      overlay = final: prev: { beamUtils = prev.callPackage ./src { }; };
     in
-    (flake-utils.lib.eachDefaultSystem (system:
+    (flake-utils.lib.eachDefaultSystem (
+      system:
       let
         pkgs = import nixpkgs {
           inherit system;
@@ -24,7 +28,8 @@
           test-buildMixRelease = pkgs.callPackage ./test/build-mix-release { };
         };
       }
-    )) // {
+    ))
+    // {
       overlays.default = overlay;
     };
 }

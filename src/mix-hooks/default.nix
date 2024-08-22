@@ -1,14 +1,14 @@
-{ lib
-, makeSetupHook
-, diffutils
-, ...
+{
+  lib,
+  makeSetupHook,
+  diffutils,
+  ...
 }:
 {
-  mixDepsCheckHook = makeSetupHook
-    {
-      name = "mix-deps-check-hook";
-      substitutions = {
-        diff = "${diffutils}/bin/diff";
-      };
-    } ./mix-deps-check-hook.sh;
+  mixDepsCheckHook = makeSetupHook {
+    name = "mix-deps-check-hook";
+    substitutions = {
+      diff = "${diffutils}/bin/diff";
+    };
+  } ./mix-deps-check-hook.sh;
 }

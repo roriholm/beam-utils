@@ -1,4 +1,9 @@
-{ beamUtils, gcc, cmake, ... }:
+{
+  beamUtils,
+  gcc,
+  cmake,
+  ...
+}:
 let
   pname = "demo";
   version = "0.1.0";
@@ -7,7 +12,10 @@ in
 beamUtils.buildMixRelease {
   inherit pname version src;
 
-  nativeBuildInputs = [ gcc cmake ];
+  nativeBuildInputs = [
+    gcc
+    cmake
+  ];
 
   mixDeps = beamUtils.fetchMixDeps {
     pname = "${pname}-mix-deps";
