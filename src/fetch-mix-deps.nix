@@ -86,7 +86,8 @@ stdenvNoCC.mkDerivation (
 
         mkdir -p $out
 
-        mix deps.get --only $MIX_ENV
+        echo "Fetching dependencies..."
+        mix deps.get --only $MIX_ENV || exit 1
 
         # 1. To make Elixir deps checking work as expected, .git should be a
         #    valid git repository. So, you can't just remove .git or the necessary
