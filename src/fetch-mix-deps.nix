@@ -7,6 +7,7 @@
   hex,
   rebar3,
   git,
+  pkg-config,
 }@inputs:
 
 {
