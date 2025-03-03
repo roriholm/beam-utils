@@ -1,5 +1,5 @@
 {
-  stdenvNoCC,
+  stdenv,
   lib,
   glibcLocalesUtf8,
   cacert,
@@ -47,6 +47,8 @@ stdenvNoCC.mkDerivation (
       elixir
       hex
       git
+      pkg-config
+      gcc
     ];
 
     env = {
