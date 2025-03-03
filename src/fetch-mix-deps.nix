@@ -30,10 +30,10 @@ let
     "hex"
   ];
 in
-stdenvNoCC.mkDerivation (
+stdenv.mkDerivation (
   overridable
   // (
-    if stdenvNoCC.isLinux then
+    if stdenv.isLinux then
       {
         LOCALE_ARCHIVE = "${glibcLocalesUtf8}/lib/locale/locale-archive";
         LC_ALL = "en_US.UTF-8";
