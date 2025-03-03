@@ -8,6 +8,7 @@
   rebar3,
   git,
   pkg-config,
+  gcc
 }@inputs:
 
 {
